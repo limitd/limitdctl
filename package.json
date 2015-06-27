@@ -1,0 +1,24 @@
+{
+  "name": "limitdctl",
+  "description": "A simple command line tool for limitd.",
+  "version": "0.0.0",
+  "author": "José F. Romaniello <jfromaniello@gmail.com> (http://joseoncode.com)",
+  "repository": {
+    "url": "git://github.com/limitd/limitdctl.git"
+  },
+  "bin": "bin/limitdctl",
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "commander": "~2.8.1",
+    "limitd-client": "~1.0.3",
+    "lodash": "~3.9.3"
+  },
+  "devDependencies": {
+    "chai": "~3.0.0",
+    "limitd": "~4.2.0",
+    "mocha": "~2.2.5",
+    "rimraf": "~2.4.0"
+  }
+}
