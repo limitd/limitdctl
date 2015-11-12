@@ -3,6 +3,7 @@
 var program = require('commander');
 var LimitdClient = require('limitd-client');
 var _ = require('lodash');
+var Table = require('cli-table');
 
 program.version(require('../package').version)
   .option('-p, --port [9231]', 'Port to bind [9231].', '9231')
@@ -11,7 +12,8 @@ program.version(require('../package').version)
   .option('-k, --key <key>', 'Bucket key')
   .option('-t, --take <n>', 'Take or fail n tokens from the bucket.', parseInt)
   .option('-w, --wait <n>', 'Take or wait n tokens from the bucket.', parseInt)
-  .option('-p, --put <n>', 'Put n tokens in the bucket.', parseInt)
+  .option('-r, --put <n>', 'Put / reset n tokens in the bucket.', parseInt)
+  .option('-s, --status', 'Get the status of multiple buckets.')
   .option('-j, --json', 'Return json output')
   .parse(process.argv);
 
@@ -25,7 +27,7 @@ if (!program.key) {
   return process.exit(1);
 }
 
-var methods = _.intersection(['take', 'wait', 'put'], Object.keys(program));
+var methods = _.intersection(['take', 'wait', 'put', 'status'], Object.keys(program));
 if (methods.length > 1 || methods.length === 0) {
   console.error('one and only one method must be provided "--take", "--wait" or "--put"');
   return process.exit(1);
@@ -36,6 +38,36 @@ var config = _.pick(program, ['port', 'hostname']);
 var client = new LimitdClient(config);
 
 client.once('ready', function () {
+  if ( method === 'status' ) {
+    client.status(program.bucket, program.key, function (err, result) {
+      if (err) {
+        console.error(err.message);
+        return process.exit(1);
+      }
+      if (program.json) {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        if (!result.items || result.items.length === 0) {
+          console.log('no results');
+          return process.exit(0);
+        }
+        var table = new Table({
+          head: Object.keys(result.items[0])
+        });
+
+        result.items.map(function (r) {
+          return _.values(r);
+        }).forEach(function (r) {
+          table.push(r);
+        });
+
+        console.log(table.toString());
+
+      }
+      process.exit(0);
+    });
+  }
+
   client[method](program.bucket, program.key, program[method], function (err, result) {
     if (err) {
       console.error(err.message);
