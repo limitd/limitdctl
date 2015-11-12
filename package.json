@@ -1,7 +1,7 @@
 {
   "name": "limitdctl",
   "description": "A simple command line tool for limitd.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "José F. Romaniello <jfromaniello@gmail.com> (http://joseoncode.com)",
   "repository": {
     "url": "git://github.com/limitd/limitdctl.git"
