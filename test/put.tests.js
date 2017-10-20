@@ -12,5 +12,4 @@ describe('put', function () {
       });
     });
   });
-
 });

@@ -12,13 +12,13 @@
   },
   "dependencies": {
     "cli-table": "~0.3.1",
-    "commander": "~2.8.1",
-    "limitd-client": "~1.7.1",
+    "commander": "^2.11.0",
+    "limitd-client": "^2.11.0",
     "lodash": "~3.9.3"
   },
   "devDependencies": {
     "chai": "~3.0.0",
-    "limitd": "~4.2.0",
+    "limitd": "^5.3.1",
     "mocha": "~2.2.5",
     "rimraf": "~2.4.0"
   }
