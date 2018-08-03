@@ -11,7 +11,7 @@ function list(val) {
 program.version(require('../package').version)
   .option('-p, --port [9231]', 'Port to bind [9231].')
   .option('-h --hostname [0.0.0.0]', 'Hostname/s to bind.')
-  .option('-hs, --hosts <hosts>', 'Comma separated list of hosts', list, ['limitd://0.0.0.0:9231'])
+  .option('-hs, --hosts <hosts>', 'Comma separated list of hosts', list)
   .option('-sh, --shard', 'Use a shard client. You must specify either one or more hostnames or the autodiscover option')
   .option('-a, --autodiscover <hostname>', 'DNS-based shard members discovery.')
   .option('-b, --bucket <bucket>', 'Bucket type')
@@ -83,6 +83,7 @@ function normalizeLimitdConfig(program) {
 
 var method = methods[0];
 var config = normalizeLimitdConfig(program);
+console.log(config);
 var client = new LimitdClient(config);
 client.once('ready', function () {
   if ( method === 'status' ) {
@@ -91,6 +92,8 @@ client.once('ready', function () {
         console.error(err.message);
         return process.exit(1);
       }
+
+      console.log('aaaa!!')
       if (program.json) {
         console.log(JSON.stringify(result, null, 2));
       } else {
