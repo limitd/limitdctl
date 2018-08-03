@@ -20,7 +20,7 @@ describe('take', function () {
 
   it('should fail if method is missing', function (done) {
     exec(limitdctl + ' --bucket ip --key 127.0.0.1', function (err, stdout, stderr) {
-      assert.include(stderr, 'one and only one method must be provided "--take", "--wait" or "--put"');
+      assert.include(stderr, 'one and only one method must be provided "--take", "--wait", "--put" or "--status"');
       done();
     });
   });

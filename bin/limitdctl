@@ -1,13 +1,19 @@
 #!/usr/bin/env node
-
 var program = require('commander');
 var LimitdClient = require('limitd-client');
 var _ = require('lodash');
 var Table = require('cli-table');
 
+function list(val) {
+  return typeof(val) === 'string' && val.split(',');
+}
+
 program.version(require('../package').version)
-  .option('-p, --port [9231]', 'Port to bind [9231].', '9231')
-  .option('-h, --hostname [0.0.0.0]', 'Hostname to bind [0.0.0.0].', '0.0.0.0')
+  .option('-p, --port [9231]', 'Port to bind [9231].')
+  .option('-h --hostname [0.0.0.0]', 'Hostname/s to bind.')
+  .option('-hs, --hosts <hosts>', 'Comma separated list of hosts', list)
+  .option('-sh, --shard', 'Use a shard client. You must specify either one or more hostnames or the autodiscover option')
+  .option('-a, --autodiscover <hostname>', 'DNS-based shard members discovery.')
   .option('-b, --bucket <bucket>', 'Bucket type')
   .option('-k, --key <key>', 'Bucket key')
   .option('-t, --take <n>', 'Take or fail n tokens from the bucket.', parseInt)
@@ -29,14 +35,56 @@ if (!program.key) {
 
 var methods = _.intersection(['take', 'wait', 'put', 'status'], Object.keys(program));
 if (methods.length > 1 || methods.length === 0) {
-  console.error('one and only one method must be provided "--take", "--wait" or "--put"');
+  console.error('one and only one method must be provided "--take", "--wait", "--put" or "--status"');
   return process.exit(1);
 }
 
-var method = methods[0];
-var config = _.pick(program, ['port', 'hostname']);
-var client = new LimitdClient(config);
+var hostOptions = _.intersection(['autodiscover', 'hosts', 'hostname'], Object.keys(program));
+if (hostOptions.length > 1 || hostOptions.length === 0) {
+  console.error('one and only one option must be provided "--autodiscover", "--hosts", "--hostname"');
+  return process.exit(1);
+}
 
+if (program.shard && !program.hosts && !program.autodiscover) {
+  console.error('"--shard" option requires "--hosts" or "--autodiscover" options to be provided');
+  return process.exit(1);
+}
+
+function normalizeLimitdConfig(program) {
+  if (program.autodiscover) {
+    return {
+      shard: {
+        autodiscover: { address: program.autodiscover }
+      }
+    };
+  }
+
+  if (Array.isArray(program.hosts)) {
+    if (program.shard) {
+      return {
+        shard: {
+          hosts: program.hosts
+        }
+      };
+    } else {
+      return { hosts: program.hosts };
+    }
+  }
+
+  return {
+    hosts: [
+      {
+        hostname: program.hostname,
+        port: program.port
+      }
+    ]
+  };
+}
+
+var method = methods[0];
+var config = normalizeLimitdConfig(program);
+console.log(config);
+var client = new LimitdClient(config);
 client.once('ready', function () {
   if ( method === 'status' ) {
     client.status(program.bucket, program.key, function (err, result) {
@@ -44,6 +92,8 @@ client.once('ready', function () {
         console.error(err.message);
         return process.exit(1);
       }
+
+      console.log('aaaa!!')
       if (program.json) {
         console.log(JSON.stringify(result, null, 2));
       } else {

@@ -3,22 +3,18 @@ var rimraf = require('rimraf');
 var db = __dirname + '/db';
 
 module.exports = {
-  start: function (callback) {
+  start: function (port, db, callback) {
     rimraf.sync(db);
-    this.server = new LimitdServer({
+    const server = new LimitdServer({
       db: db,
+      port: port,
       buckets: {
         ip: {
           per_minute: 10
         }
       }
     });
-    this.server.start(callback);
-  },
-  stop: function () {
-    if (this.server) {
-      this.server.stop();
-      delete this.server;
-    }
+
+    server.start((err) => callback(err, server));
   }
 };
